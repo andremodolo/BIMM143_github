@@ -3,7 +3,7 @@ My [BIMM143](https://bioboot.github.io/bimm143_W23/) classwork at UC San Diego W
 
 -Class 4: [Introduction to R](https://github.com/andremodolo/BIMM143_github/blob/main/BIMM143-Class-4-Lab.pdf)
 
--Class 5: Data Visualization with ggplot
+-Class 5: [Data Visualization with ggplot](https://github.com/andremodolo/BIMM143_github/blob/main/Class05BIMM143/Class05.qmd)
 
 -Class 6:
 
