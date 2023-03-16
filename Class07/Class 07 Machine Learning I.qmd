@@ -1,0 +1,232 @@
+---
+title: "Class 07 Unsupervised learning"
+author: "Andre Modolo"
+format: docx
+---
+
+In this class we will explore clustering and dimensional reduction methods.
+
+## K-means (K=number of clusters)
+
+Make up input data where we know what the answer should be.
+
+```{r}
+tmp <- c(rnorm(30, -3), rnorm(30, 3))
+# make it into a 2 dimensional thing
+x <- cbind(x=tmp, y=rev(tmp))
+# rev(tmp) flips the vector 
+rev(tmp)
+head(x)
+```
+
+Quick plot of x to see the 2 groups around (-3, 3) and (3, -3)
+
+```{r}
+plot(x)
+```
+
+Use the `kmeans()` function setting k to 2 and nstart=20 (do the picking points and finding the distances to decide a potential cluster 20 times before deciding a winning set of clusters)
+
+```{r}
+km <- kmeans(x,center=2, nstart=20 )
+km
+```
+
+Clustering means: gives us the mean point of each cluster
+
+```{r}
+km$size
+```
+
+Size of the clusters found: 30 and 30 Clustering vector: lables each component of the vector as the first or second cluster
+
+Q. What component of your result object details? - cluster assignment/membership (1 or 2 in this case)
+
+```{r}
+km$cluster
+```
+
+-Cluster center?
+
+```{r}
+km$center
+```
+
+Q. plot x colored by the kmeans cluster assignment and add cluster centers as blue points
+
+```{r}
+plot(x, col=km$cluster)
+points(km$centers, col="blue", pch=15, cex=2)
+```
+
+What if I ask for more than 2 clusters?
+
+```{r}
+km4 <- kmeans(x, 4, nstart=20)
+km4
+```
+
+```{r}
+plot(x, col=km4$cluster)
+points(km4$centers, col="blue", pch=15, cex=2)
+```
+
+#Hierarchical Clustering
+
+Super useful and widely employed clustering method which has the advantage over kmeans because it can show you a little something about the true nature of the clustering in your data You need to give it a "d" distance matrix as an input (how far apart the values are). get it using `dist()`
+
+```{r}
+d <- dist(x)
+hc <- hclust(d)
+hc
+```
+
+There is a plot method for hcluster results:
+
+```{r}
+plot(hc)
+```
+
+You get 2 overall branches with 1:30 on one branch and 31:60 on the other branch. This makes sense because in the vector we made the first 30 numbers have a set mean and the second 30 numbers have another set mean.
+
+Long goal post = big jump between the things you grouped together and the next group.
+
+How do I get an actual result out of this? cut the longest post, and you are left with "subtrees" in this case you are left with 2 subtrees.
+
+```{r}
+plot(hc)
+#cut the tree with this line 
+abline(h=10, col="red")
+```
+
+To get the cluster membership vector, I need to "cut my tree" to yield subtrees with the function `cutree()` with h=height to cut, **or** k= number of clusters you want after the cut
+
+```{r}
+grps <- cutree(hc, h=10)
+grps
+```
+
+```{r}
+plot(x, col=grps)
+```
+
+
+# Principal Component Analysis (PCA)
+
+The base R function to do PCA is called `prcomp()`
+
+Import the food data from the 4 countries
+
+```{r}
+url <- "https://tinyurl.com/UK-foods"
+x <- read.csv(url)
+dim(x)
+```
+There are 17 row and 5 columns 
+
+```{r}
+head(x)
+```
+We can remove the x column and only get the 4 counties as columns by using this code
+```{r}
+rownames(x) <- x[,1]
+x<- x[,-1]
+head(x)
+```
+
+Be careful with this approach because if you keep running it multiple times, it will keep removing the name of the first column
+
+A more robust way of doing it would be using this method, setting the row name as 1, so you can rerun the code and it won't delete any more column names
+```{r}
+x <- read.csv(url, row.names=1)
+head(x)
+```
+
+Spotting the major differences and trends using a bar plot
+
+```{r}
+barplot(as.matrix(x), beside=T, col=rainbow(nrow(x)))
+```
+Doing `beside=False` you get this kind of bar plot 
+
+```{r}
+barplot(as.matrix(x), beside=F, col=rainbow(nrow(x)))
+```
+What about plotting it this way?
+
+```{r}
+pairs(x, col=rainbow(10), pch=16)
+```
+What does it mean when a point lies on a diagonal of a given plot?
+This gives a matrix of scatterplots comparing the countries as an x and a y variable in each situation. This way you only have to look at bottom left or top right half depending in which country you want to be on which axis.
+
+If the point lies on the diagonal of a scatterplot, this means that the two countries have a similar amount of consumption for that specific food group (color)
+
+The main difference in food consumption between N. Ireland and the other countries is in the food colored blue 
+
+#PCA to the rescue
+
+Take the transpose of x to flip the rows and columns
+
+```{r}
+t(x)
+```
+
+Now do prcomp() and print out the summary 
+
+```{r}
+pca <- prcomp(t(x))
+summary(pca)
+```
+Proportion of Variance: 67.4% of all the variance is captured on the new axis made.
+
+Cumulative Proportion: adding 2 or 3 PCs together you capture basically all the variance from the plots (ex: PC2 with 96.5%!)
+
+A "PCA plot" (a.k.a "Score Plot", PC1vsPC2 plot, etc.)
+
+```{r}
+pca$x
+```
+Plot the PC1 vs PC2 and color the countries Irland is green
+```{r}
+plot(pca$x[,1], pca$x[,2], col=c("orange","red", "blue", "green"), pch=18)
+```
+
+You see that N. Ireland is actually different than the other countries in their food consumption. 
+
+Below we can use the square of pca$sdev , which stands for “standard deviation”, to calculate how much variation in the original data each PC accounts for:
+
+```{r}
+v <- round( pca$sdev^2/sum(pca$sdev^2) * 100 )
+v
+```
+
+This information can be summarized in a plot of the variances (eigenvalues) with respect to the principal component number (eigenvector number), which is given below.
+
+```{r}
+barplot(v, xlab="Principal Component", ylab="Percent Variation")
+```
+
+We can also consider the influence of each of the original variables upon the principal components (typically known as loading scores). This information can be obtained from the prcomp() returned $rotation component
+
+Using PC1 we can get this barplot:
+
+```{r}
+par(mar=c(10, 3, 0.35, 0))
+barplot( pca$rotation[,1], las=2 )
+```
+Now we can see what foods that make N. Ireland more different than the rest if the countries. 
+
+Generate a similar ‘loadings plot’ for PC2. What two food groups feature prominantely and what does PC2 maninly tell us about?
+```{r}
+par(mar=c(10, 3, 0.35, 0))
+barplot( pca$rotation[,2], las=2 )
+```
+
+Using PC2 it tells us that N. Ireland eats more fresh potatoes and drinks less soft drinks 
+
+
+
+
+
+
