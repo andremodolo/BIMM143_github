@@ -7,7 +7,7 @@ My [BIMM143](https://bioboot.github.io/bimm143_W23/) classwork at UC San Diego W
 
 - Class 6:
 
-- Class 7:
+- Class 7: [Some link](https://github.com/andremodolo/BIMM143_github/blob/main/Class07/Class%2007%20Machine%20Learning%20I.pdf)
 
 - Class 8:
 
