@@ -1,6 +1,6 @@
 # BIMM143
 My BIMM143 classwork at UC San Diego Winter 2023
 
-Class 4: Introduction to R
+-Class 4: Introduction to R
+-Class 5: Data Visualization with ggplot
 
-Class 5: Data Visualization with ggplot
